@@ -1,4 +1,4 @@
-package it.smartcommunitylab.trento.mobilitydatawrapper;
+package it.smartcommunitylab.trento.mobilitydatawrapper.model;
 
 import java.sql.Timestamp;
 

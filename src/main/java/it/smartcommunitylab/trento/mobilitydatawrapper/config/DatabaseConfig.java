@@ -13,10 +13,8 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  ******************************************************************************/
-package it.smartcommunitylab.trento.mobilitydatawrapper;
+package it.smartcommunitylab.trento.mobilitydatawrapper.config;
 
-import java.beans.PropertyVetoException;
-import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
@@ -83,9 +81,9 @@ public class DatabaseConfig {
 		DriverManagerDataSource bean = new DriverManagerDataSource();
 		
 		bean.setDriverClassName(env.getProperty("spring.datasource.driverClassName"));
-		bean.setUrl(env.getProperty("db.parkings.url"));
-		bean.setUsername(env.getProperty("db.parkings.username"));
-		bean.setPassword(env.getProperty("db.parkings.password"));
+		bean.setUrl(env.getProperty("db.traffic.url"));
+		bean.setUsername(env.getProperty("db.traffic.username"));
+		bean.setPassword(env.getProperty("db.traffic.password"));
 
 		return bean;
 	}	

@@ -1,4 +1,4 @@
-package it.smartcommunitylab.trento.mobilitydatawrapper;
+package it.smartcommunitylab.trento.mobilitydatawrapper.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
