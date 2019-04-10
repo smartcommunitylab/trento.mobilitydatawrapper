@@ -18,9 +18,11 @@ public class Position {
 		
 		Point point = GeoUtils.convert(gx, gy);
 		
-		coordinates = new Double[2];
-		coordinates[0] = point.getX();
-		coordinates[1] = point.getY();
+		if (point != null) {
+			coordinates = new Double[2];
+			coordinates[0] = point.getX();
+			coordinates[1] = point.getY();
+		}
 		
 	}
 
