@@ -1,5 +1,7 @@
 package it.smartcommunitylab.trento.mobilitydatawrapper.model;
 
+import java.sql.Clob;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 
 public class Traffic implements Comparable<Traffic> {
@@ -11,8 +13,8 @@ public class Traffic implements Comparable<Traffic> {
 
 	public Traffic(Object[] dbEntry) {
 		time = ((Timestamp)dbEntry[0]).getTime();
-		place = (String) dbEntry[1];
-		station = (String) dbEntry[2];
+		place = readClob((Clob)dbEntry[1]);
+		station = readClob((Clob)dbEntry[2]);
 		value = (Integer) dbEntry[3];
 	}
 
@@ -52,5 +54,18 @@ public class Traffic implements Comparable<Traffic> {
 	public int compareTo(Traffic o) {
 		// TODO Auto-generated method stub
 		return time.compareTo(o.time);
+	}
+	
+	private String readClob(Clob clob) {
+		try {
+			return clob.getSubString(1, (int)clob.length());
+		}catch(Exception e) {
+			return null;
+		} finally {
+//			try {
+//				clob.free();
+//			} catch (SQLException e) {
+//			}
+		}
 	}
 }
