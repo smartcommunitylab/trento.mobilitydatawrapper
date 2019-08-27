@@ -25,12 +25,15 @@ public class DatawrapperController {
 
 	public static final long MAX_INT = 1000*60*60*24*31L;
 	
+//	@Autowired
+//	private DBConnector cache;
+	
 	@Autowired
-	private DBConnector cache;
+	private DatawrapperService service;
 
 	@GetMapping("/parkings")
 	public @ResponseBody List<Parking> getParkings() throws Exception {
-		return cache.getParkings();
+		return service.getParkings();
 	}
 
 	@GetMapping("/traffic/{source}/{by}/{from}/{to}")
@@ -39,12 +42,12 @@ public class DatawrapperController {
 //		long t = 1544309999000L; // December 8th, 2018 23:59:59
 		long diff = to - from;
 		if ((BY_TYPE.By5m.equals(by) || BY_TYPE.ByHour.equals(by)) && diff > MAX_INT) throw new IllegalArgumentException();
-		return cache.trentoTrafficProcedure(source, by, from, to);
+		return service.getTraffic(source, by, from, to);
 	}	
 	
 	@GetMapping("/positions/{source}")
 	public @ResponseBody List<Position> getPositions(@PathVariable SOURCE_TYPE source) throws Exception {
-		return cache.trentoPositionProcedure(source);
+		return service.getTrafficPositions(source);
 	}		
 
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "An error occurred")

@@ -6,66 +6,80 @@ import java.sql.Timestamp;
 
 public class Traffic implements Comparable<Traffic> {
 
-	private Long time;
-	private String place;
-	private String station;
-	private Integer value;
+    private Long time;
+    private String place;
+    private String station;
+    private Integer value;
 
-	public Traffic(Object[] dbEntry) {
-		time = ((Timestamp)dbEntry[0]).getTime();
-		place = readClob((Clob)dbEntry[1]);
-		station = readClob((Clob)dbEntry[2]);
-		value = (Integer) dbEntry[3];
-	}
+    public Traffic(Object[] dbEntry) {
+        time = ((Timestamp) dbEntry[0]).getTime();
+        place = readClob((Clob) dbEntry[1]);
+        station = readClob((Clob) dbEntry[2]);
+        value = (Integer) dbEntry[3];
+    }
 
-	public Long getTime() {
-		return time;
-	}
+    public Traffic(Long time, String place, String station, Integer value) {
+        this.time = time;
+        this.place = place;
+        this.station = station;
+        this.value = value;
+    }
 
-	public void setTime(Long time) {
-		this.time = time;
-	}
+    public Traffic(Timestamp time, Clob place, Clob station, Integer value) {
+        this.time = time.getTime();
+        this.place = readClob(place);
+        this.station = readClob(station);
+        this.value = value;
+    }
 
-	public String getPlace() {
-		return place;
-	}
+    public Long getTime() {
+        return time;
+    }
 
-	public void setPlace(String place) {
-		this.place = place;
-	}
+    public void setTime(Long time) {
+        this.time = time;
+    }
 
-	public String getStation() {
-		return station;
-	}
+    public String getPlace() {
+        return place;
+    }
 
-	public void setStation(String station) {
-		this.station = station;
-	}
+    public void setPlace(String place) {
+        this.place = place;
+    }
 
-	public Integer getValue() {
-		return value;
-	}
+    public String getStation() {
+        return station;
+    }
 
-	public void setValue(Integer value) {
-		this.value = value;
-	}
+    public void setStation(String station) {
+        this.station = station;
+    }
 
-	@Override
-	public int compareTo(Traffic o) {
-		// TODO Auto-generated method stub
-		return time.compareTo(o.time);
-	}
-	
-	private String readClob(Clob clob) {
-		try {
-			return clob.getSubString(1, (int)clob.length());
-		}catch(Exception e) {
-			return null;
-		} finally {
+    public Integer getValue() {
+        return value;
+    }
+
+    public void setValue(Integer value) {
+        this.value = value;
+    }
+
+    @Override
+    public int compareTo(Traffic o) {
+        // TODO Auto-generated method stub
+        return time.compareTo(o.time);
+    }
+
+    private String readClob(Clob clob) {
+        try {
+            return clob.getSubString(1, (int) clob.length());
+        } catch (Exception e) {
+            return null;
+        } finally {
 //			try {
 //				clob.free();
 //			} catch (SQLException e) {
 //			}
-		}
-	}
+        }
+    }
 }

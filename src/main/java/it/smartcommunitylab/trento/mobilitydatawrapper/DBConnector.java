@@ -13,6 +13,7 @@ import javax.persistence.Query;
 import javax.persistence.StoredProcedureQuery;
 
 import org.geotools.referencing.CRS;
+import org.hibernate.procedure.ProcedureOutputs;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.slf4j.Logger;
@@ -73,7 +74,8 @@ public class DBConnector {
 	}
 
 	public List<Parking> trentoParkingsProcedure() {
-		logger.info("Reading data from TRENTO DB");
+		logger.info("Reading data from TRENTO DB sp_SelectParkingData");
+		
 		String q = "{CALL dbo.sp_SelectParkingData()}";
 		Query query = parkingsEntityManager.createNativeQuery(q);
 		List<Object[]> result = query.getResultList();
@@ -81,7 +83,9 @@ public class DBConnector {
 		return parkings;
 	}
 
-	public List<Traffic> trentoTrafficProcedure(SOURCE_TYPE source, BY_TYPE by, long from, long to) {
+	public List<Object[]> trentoTrafficProcedure(SOURCE_TYPE source, BY_TYPE by, long from, long to) {
+	    logger.info("Reading data from TRENTO DB sp_Select" + source + "Data" + by);
+
 		StoredProcedureQuery storedProcedure = trafficEntityManager.createStoredProcedureQuery("dbo.sp_Select" + source + "Data" + by);
 
 		storedProcedure.registerStoredProcedureParameter(0, Timestamp.class, ParameterMode.IN);
@@ -89,19 +93,37 @@ public class DBConnector {
 
 		storedProcedure.setParameter(0, new Timestamp(from));
 		storedProcedure.setParameter(1, new Timestamp(to));
-
-		List<Object[]> result = storedProcedure.getResultList();
-
-		List<Traffic> traffic = result.stream().map(x -> new Traffic(x)).sorted().collect(Collectors.toList());
-		return traffic;
+		
+        try {
+            //explicitly fetch to a list to flush cursor results
+            List<Object[]> result = storedProcedure.getResultList();
+            return result;
+        } finally {
+            //properly close underlying JDBC CallableStatement to avoid leaking 
+            storedProcedure.unwrap(ProcedureOutputs.class).release();
+        }
 	}
 
-	public List<Position> trentoPositionProcedure(SOURCE_TYPE source) {
-		String q = "{CALL dbo.sp_Select" + source + "PositionData()}";
-		Query query = trafficEntityManager.createNativeQuery(q);
-		List<Object[]> result = query.getResultList();
-		List<Position> positions = result.stream().map(x -> new Position(x)).collect(Collectors.toList());
-		return positions;
+	public List<Object[]> trentoPositionProcedure(SOURCE_TYPE source) {
+        logger.info("Reading data from TRENTO DB sp_Select" + source + "PositionData");
+
+        StoredProcedureQuery storedProcedure = trafficEntityManager.createStoredProcedureQuery("dbo.sp_Select" + source + "PositionData");
+        try {
+            //explicitly fetch to a list to flush cursor results            
+            List<Object[]> result = storedProcedure.getResultList();
+            return result;
+        } finally {
+            // properly close underlying JDBC CallableStatement to avoid leaking
+            storedProcedure.unwrap(ProcedureOutputs.class).release();
+        }
 	}
 
+	// public List<Position> trentoPositionProcedure(SOURCE_TYPE source) {
+//  String q = "{CALL dbo.sp_Select" + source + "PositionData()}";
+//  Query query = trafficEntityManager.createNativeQuery(q);
+//  List<Object[]> result = query.getResultList();
+//  List<Position> positions = result.stream().map(x -> new Position(x)).collect(Collectors.toList());
+//  return positions;
+//}
+	
 }
