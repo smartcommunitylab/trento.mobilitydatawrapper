@@ -161,9 +161,13 @@ public class JDBCConnector {
                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_READ_ONLY);
 
-            statement.setTimestamp(1, new Timestamp(from));
-            statement.setTimestamp(2, new Timestamp(to));
+//            statement.setTimestamp(1, new Timestamp(from));
+//            statement.setTimestamp(2, new Timestamp(to));
 
+            statement.setString(1, "2019-04-14T14:00:00");
+            statement.setString(2, "2019-04-14T15:00:00");
+
+            
             boolean results = true;
             int rowsAffected = 0;
             rs = statement.executeQuery();
