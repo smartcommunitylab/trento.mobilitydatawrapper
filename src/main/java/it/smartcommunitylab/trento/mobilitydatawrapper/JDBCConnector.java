@@ -131,7 +131,7 @@ public class JDBCConnector {
             }
             if (connection != null) {
                 try {
-                    statement.close();
+                    connection.close();
                 } catch (SQLException ex) {
                     logger.error(
                             "Error closing connection for TRENTO DB sp_Select" + source + "PositionData: "
@@ -218,7 +218,7 @@ public class JDBCConnector {
             }
             if (connection != null) {
                 try {
-                    statement.close();
+                    connection.close();
                 } catch (SQLException ex) {
                     logger.error(
                             "Error closing connection for TRENTO DB sp_Select" + source + "Data: "
