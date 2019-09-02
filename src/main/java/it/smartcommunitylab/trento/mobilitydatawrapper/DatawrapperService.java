@@ -20,7 +20,10 @@ public class DatawrapperService {
 
     @Autowired
     private DBConnector db;
-
+    
+    @Autowired
+    private JDBCConnector jdb;
+    
     public List<Parking> getParkings() throws Exception {
         return db.getParkings();
     }
@@ -28,7 +31,7 @@ public class DatawrapperService {
     public List<Traffic> getTraffic(SOURCE_TYPE source, BY_TYPE by,
             long from, long to) throws Exception {
         SOURCE_TYPE dbSource = getDbSource(source);
-        List<Object[]> result = db.trentoTrafficProcedure(dbSource, by, from, to);
+        List<Object[]> result = jdb.trentoTrafficProcedure(dbSource, by, from, to);
 
         List<Traffic> traffic = new ArrayList<Traffic>();
 
@@ -49,7 +52,8 @@ public class DatawrapperService {
 
     public List<Position> getTrafficPositions(SOURCE_TYPE source) throws Exception {
         SOURCE_TYPE dbSource = getDbSource(source);
-        List<Object[]> result = db.trentoPositionProcedure(dbSource);
+//        List<Object[]> result = jdb.trentoPositionProcedure(dbSource);
+        List<Object[]> result = jdb.getTrafficPositions(dbSource);
         return result.stream().map(x -> new Position(x)).collect(Collectors.toList());
     }
 

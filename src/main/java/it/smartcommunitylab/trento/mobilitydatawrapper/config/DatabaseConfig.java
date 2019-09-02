@@ -76,7 +76,7 @@ public class DatabaseConfig {
     }	
 	
 	
-	@Bean
+	@Bean(name="trafficDataSource")
 	public DriverManagerDataSource getTrafficDataSource()  {
 		DriverManagerDataSource bean = new DriverManagerDataSource();
 		
