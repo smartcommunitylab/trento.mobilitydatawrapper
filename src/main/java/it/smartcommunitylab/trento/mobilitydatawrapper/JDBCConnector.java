@@ -160,8 +160,8 @@ public class JDBCConnector {
                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_READ_ONLY);
 
-            statement.setTimestamp(0, new Timestamp(from));
-            statement.setTimestamp(1, new Timestamp(to));
+            statement.setTimestamp(1, new Timestamp(from));
+            statement.setTimestamp(2, new Timestamp(to));
 
             boolean results = statement.execute();
             int rowsAffected = 0;
