@@ -101,9 +101,9 @@ public class JDBCConnector {
             while (rs.next()) {
                 // explicit map
                 Object[] obj = new Object[3];
-                obj[0] = rs.getObject(0);
-                obj[1] = rs.getObject(1);
-                obj[2] = rs.getObject(2);
+                obj[0] = rs.getObject(1);
+                obj[1] = rs.getObject(2);
+                obj[2] = rs.getObject(3);
                 list.add(obj);
             }
         } catch (Exception ex) {
@@ -181,15 +181,15 @@ public class JDBCConnector {
             while (rs.next()) {
                 // explicit map
                 Object[] obj = new Object[3];
-                obj[0] = rs.getObject(0);
-                obj[1] = rs.getObject(1);
-                obj[2] = rs.getObject(2);
-                obj[3] = rs.getObject(3);
-                obj[4] = rs.getObject(4);
+                obj[0] = rs.getObject(1);
+                obj[1] = rs.getObject(2);
+                obj[2] = rs.getObject(3);
+                obj[3] = rs.getObject(4);
+                obj[4] = rs.getObject(5);
 
                 if (SOURCE_TYPE.Narx.equals(source)) {
-                    obj[5] = rs.getObject(5);
-                    obj[6] = rs.getObject(6);
+                    obj[5] = rs.getObject(6);
+                    obj[6] = rs.getObject(7);
                 }
                 list.add(obj);
             }
