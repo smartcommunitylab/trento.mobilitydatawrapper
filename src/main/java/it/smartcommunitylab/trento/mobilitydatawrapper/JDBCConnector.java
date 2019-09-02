@@ -161,23 +161,22 @@ public class JDBCConnector {
                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_READ_ONLY);
 
-            
             statement.setTimestamp(1, new Timestamp(from));
             statement.setTimestamp(2, new Timestamp(to));
 
             boolean results = true;
             int rowsAffected = 0;
-
-            // Protects against lack of SET NOCOUNT in stored procedure
-            while (results || rowsAffected != -1) {
-                if (results) {
-                    rs = statement.getResultSet();
-                    break;
-                } else {
-                    rowsAffected = statement.getUpdateCount();
-                }
-                results = statement.getMoreResults();
-            }
+            rs = statement.getResultSet();
+//            // Protects against lack of SET NOCOUNT in stored procedure
+//            while (results || rowsAffected != -1) {
+//                if (results) {
+//                    rs = statement.getResultSet();
+//                    break;
+//                } else {
+//                    rowsAffected = statement.getUpdateCount();
+//                }
+//                results = statement.getMoreResults();
+//            }
 
             // read
             while (rs.next()) {
