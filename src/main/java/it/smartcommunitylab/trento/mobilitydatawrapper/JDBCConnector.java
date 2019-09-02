@@ -163,8 +163,8 @@ public class JDBCConnector {
             statement.setTimestamp(1, new Timestamp(from));
             statement.setTimestamp(2, new Timestamp(to));
 
-            boolean results = statement.execute();
-            int rowsAffected = 0;
+            boolean results = true;
+            int rowsAffected =statement.executeUpdate();
 
             // Protects against lack of SET NOCOUNT in stored procedure
             while (results || rowsAffected != -1) {
