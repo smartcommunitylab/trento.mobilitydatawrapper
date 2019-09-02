@@ -2,6 +2,7 @@ package it.smartcommunitylab.trento.mobilitydatawrapper;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -148,23 +149,24 @@ public class JDBCConnector {
         logger.info("Reading data for TRENTO DB sp_Select" + source + "Data via CS");
 
         Connection connection = null;
-        CallableStatement statement = null;
+        PreparedStatement statement = null;
         ResultSet rs = null;
         List<Object[]> list = new ArrayList<>();
 
         try {
             // Get Connection instance from dataSource
             connection = trafficDataSource.getConnection();
-            statement = connection.prepareCall(
+            statement = connection.prepareStatement(
                     "{CALL sp_Select" + source + "Data" + by + "(?, ?)}",
                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_READ_ONLY);
 
+            
             statement.setTimestamp(1, new Timestamp(from));
             statement.setTimestamp(2, new Timestamp(to));
 
-            boolean results = true;
-            int rowsAffected =statement.executeUpdate();
+            boolean results = statement.execute();
+            int rowsAffected = 0;
 
             // Protects against lack of SET NOCOUNT in stored procedure
             while (results || rowsAffected != -1) {
