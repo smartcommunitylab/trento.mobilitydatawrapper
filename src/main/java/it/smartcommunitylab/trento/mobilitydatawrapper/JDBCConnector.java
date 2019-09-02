@@ -166,7 +166,7 @@ public class JDBCConnector {
 
             boolean results = true;
             int rowsAffected = 0;
-            rs = statement.getResultSet();
+            rs = statement.executeQuery();
 //            // Protects against lack of SET NOCOUNT in stored procedure
 //            while (results || rowsAffected != -1) {
 //                if (results) {
