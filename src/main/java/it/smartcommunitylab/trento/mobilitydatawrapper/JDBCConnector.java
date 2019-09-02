@@ -165,7 +165,7 @@ public class JDBCConnector {
             statement.setTimestamp(1, new Timestamp(from));
             statement.setTimestamp(2, new Timestamp(to));
 
-            boolean results = statement.execute();
+            boolean results = true;
             int rowsAffected = 0;
 
             // Protects against lack of SET NOCOUNT in stored procedure
