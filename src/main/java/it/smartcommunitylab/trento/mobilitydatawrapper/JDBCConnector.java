@@ -2,11 +2,11 @@ package it.smartcommunitylab.trento.mobilitydatawrapper;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -31,11 +31,6 @@ import it.smartcommunitylab.trento.mobilitydatawrapper.model.SOURCE_TYPE;
 public class JDBCConnector {
     private static final Logger logger = LoggerFactory.getLogger(DBConnector.class);
 
-//    private JdbcTemplate jdbcTemplate;
-//    private SimpleJdbcCall trafficPositionProcedure_Narx;
-//    private SimpleJdbcCall trafficPositionProcedure_Spot;
-//    private SimpleJdbcCall trafficPositionProcedure_RDT;
-
     @Autowired
     @Qualifier("trafficDataSource")
     private DataSource trafficDataSource;
@@ -44,20 +39,13 @@ public class JDBCConnector {
 
     @PostConstruct
     public void init() throws Exception {
-//        logger.info("Define jdbcCalls for stored procedures");
-//        trafficPositionProcedure_Narx = new SimpleJdbcCall(trafficDataSource)
-//                .withProcedureName("dbo.sp_SelectNarxPositionData");
-//        trafficPositionProcedure_Spot = new SimpleJdbcCall(trafficDataSource)
-//                .withProcedureName("dbo.sp_SelectSpotPositionData");
-//        trafficPositionProcedure_RDT = new SimpleJdbcCall(trafficDataSource)
-//                .withProcedureName("dbo.sp_SelectRDTPositionData");
 
         positions = CacheBuilder.newBuilder().refreshAfterWrite(1, TimeUnit.MINUTES).build(
                 new CacheLoader<SOURCE_TYPE, List<Object[]>>() {
 
                     @Override
                     public List<Object[]> load(SOURCE_TYPE key) throws Exception {
-                        logger.info("Loading cache data for TRENTO DB sp_Select" + key.name() + "PositionData");
+                        logger.debug("Loading cache data for TRENTO DB sp_Select" + key.name() + "PositionData");
                         return trentoPositionProcedure(key);
                     }
                 });
@@ -68,6 +56,10 @@ public class JDBCConnector {
         return positions.get(source);
     }
 
+    public List<Object[]> getTrafficData(SOURCE_TYPE source, BY_TYPE by, long from, long to) throws ExecutionException {
+        return trentoTrafficProcedure(source, by, from, to);
+    }
+
     public List<Object[]> trentoPositionProcedure(SOURCE_TYPE source) {
         logger.info("Reading data for TRENTO DB sp_Select" + source + "PositionData via CS");
 
@@ -75,7 +67,6 @@ public class JDBCConnector {
         CallableStatement statement = null;
         ResultSet rs = null;
         List<Object[]> list = new ArrayList<>();
-
         try {
             // Get Connection instance from dataSource
             connection = trafficDataSource.getConnection();
@@ -149,54 +140,51 @@ public class JDBCConnector {
         logger.info("Reading data for TRENTO DB sp_Select" + source + "Data via CS");
 
         Connection connection = null;
-        PreparedStatement statement = null;
+        CallableStatement statement = null;
         ResultSet rs = null;
         List<Object[]> list = new ArrayList<>();
 
         try {
             // Get Connection instance from dataSource
             connection = trafficDataSource.getConnection();
-            statement = connection.prepareStatement(
-                    "{CALL sp_Select" + source + "Data" + by + "(?, ?)}",
-                    ResultSet.TYPE_SCROLL_INSENSITIVE,
+            statement = connection.prepareCall(
+                    "{CALL dbo.sp_Select" + source + "Data" + by + "(?, ?)}",
+                    ResultSet.TYPE_FORWARD_ONLY,
                     ResultSet.CONCUR_READ_ONLY);
 
-//            statement.setTimestamp(1, new Timestamp(from));
-//            statement.setTimestamp(2, new Timestamp(to));
+            statement.setTimestamp(1, new Timestamp(from));
+            statement.setTimestamp(2, new Timestamp(to));
 
-            statement.setString(1, "2019-04-14T14:00:00");
-            statement.setString(2, "2019-04-14T15:00:00");
-
-            
-            boolean results = true;
+            boolean results = statement.execute();
             int rowsAffected = 0;
-            rs = statement.executeQuery();
-//            // Protects against lack of SET NOCOUNT in stored procedure
-//            while (results || rowsAffected != -1) {
-//                if (results) {
-//                    rs = statement.getResultSet();
-//                    break;
-//                } else {
-//                    rowsAffected = statement.getUpdateCount();
-//                }
-//                results = statement.getMoreResults();
-//            }
+
+            // Protects against lack of SET NOCOUNT in stored procedure
+            while (results || rowsAffected != -1) {
+                if (results) {
+                    rs = statement.getResultSet();
+                    break;
+                } else {
+                    rowsAffected = statement.getUpdateCount();
+                }
+                results = statement.getMoreResults();
+            }
 
             // read
             while (rs.next()) {
                 // explicit map
-                Object[] obj = new Object[3];
-                obj[0] = rs.getObject(1);
-                obj[1] = rs.getObject(2);
-                obj[2] = rs.getObject(3);
-                obj[3] = rs.getObject(4);
-                obj[4] = rs.getObject(5);
+                List<Object> obj = new LinkedList<>();
+                obj.add(rs.getObject(1));
+                obj.add(rs.getObject(2));
+                obj.add(rs.getObject(3));
+                obj.add(rs.getObject(4));
+                obj.add(rs.getObject(5));
 
                 if (SOURCE_TYPE.Narx.equals(source)) {
-                    obj[5] = rs.getObject(6);
-                    obj[6] = rs.getObject(7);
+                    obj.add(rs.getObject(6));
+                    obj.add(rs.getObject(7));
                 }
-                list.add(obj);
+
+                list.add(obj.toArray(new Object[0]));
             }
         } catch (Exception ex) {
             logger.error("Error reading data for TRENTO DB sp_Select" + source + "Data: " + ex.getMessage());
@@ -204,6 +192,7 @@ public class JDBCConnector {
         } finally {
             if (rs != null) {
                 try {
+                    logger.debug("Close rs for TRENTO DB sp_Select" + source + "Data");
                     rs.close();
                 } catch (SQLException ex) {
                     logger.error(
@@ -213,6 +202,7 @@ public class JDBCConnector {
             }
             if (statement != null) {
                 try {
+                    logger.debug("Close statement for TRENTO DB sp_Select" + source + "Data");
                     statement.close();
                 } catch (SQLException ex) {
                     logger.error(
@@ -223,6 +213,7 @@ public class JDBCConnector {
             }
             if (connection != null) {
                 try {
+                    logger.debug("Close connection for TRENTO DB sp_Select" + source + "Data");
                     connection.close();
                 } catch (SQLException ex) {
                     logger.error(
