@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 
 import com.vividsolutions.jts.geom.Point;
 
-import it.smartcommunitylab.trento.mobilitydatawrapper.GeoUtils;
-
 public class Position {
 
 	private String place;
@@ -16,16 +14,20 @@ public class Position {
 		double gx = ((BigDecimal)dbEntry[1]).doubleValue();
 		double gy = ((BigDecimal)dbEntry[2]).doubleValue();
 		
-		Point point = GeoUtils.convert(gx, gy);
-		
-		if (point != null) {
-			coordinates = new Double[2];
-			coordinates[0] = point.getX();
-			coordinates[1] = point.getY();
-		}
+		//store as received, needs conversion if not lat/long
+		coordinates = new Double[2];
+        coordinates[0] = gx;
+        coordinates[1] =gy;
 		
 	}
-
+	
+    public Position(String place, Point point) {
+        this.place = place;
+        this.coordinates = new Double[2];
+        this.coordinates[0] = point.getX();
+        this.coordinates[1] = point.getY();       
+    }
+    
 	public String getPlace() {
 		return place;
 	}

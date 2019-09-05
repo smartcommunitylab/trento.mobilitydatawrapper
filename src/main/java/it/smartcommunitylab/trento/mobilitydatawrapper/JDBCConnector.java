@@ -25,22 +25,28 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import it.smartcommunitylab.trento.mobilitydatawrapper.model.BY_TYPE;
+import it.smartcommunitylab.trento.mobilitydatawrapper.model.DATA_TYPE;
 import it.smartcommunitylab.trento.mobilitydatawrapper.model.SOURCE_TYPE;
 
 @Component
 public class JDBCConnector {
-    private static final Logger logger = LoggerFactory.getLogger(DBConnector.class);
+    private static final Logger logger = LoggerFactory.getLogger(JDBCConnector.class);
 
     @Autowired
     @Qualifier("trafficDataSource")
     private DataSource trafficDataSource;
 
+    @Autowired
+    @Qualifier("parkingsDataSource")
+    private DataSource parkingsDataSource;
+
     private LoadingCache<SOURCE_TYPE, List<Object[]>> positions;
+    private LoadingCache<DATA_TYPE, List<Object[]>> parkings;
 
     @PostConstruct
     public void init() throws Exception {
 
-        positions = CacheBuilder.newBuilder().refreshAfterWrite(1, TimeUnit.MINUTES).build(
+        positions = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(
                 new CacheLoader<SOURCE_TYPE, List<Object[]>>() {
 
                     @Override
@@ -50,6 +56,20 @@ public class JDBCConnector {
                     }
                 });
 
+        parkings = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(
+                new CacheLoader<DATA_TYPE, List<Object[]>>() {
+
+                    @Override
+                    public List<Object[]> load(DATA_TYPE key) throws Exception {
+                        logger.debug("Loading cache data for TRENTO DB sp_SelectParkingData key " + key.name());
+                        return trentoParkingsProcedure();
+                    }
+                });
+
+    }
+
+    public List<Object[]> getParkingsData() throws ExecutionException {
+        return parkings.get(DATA_TYPE.PARKINGS);
     }
 
     public List<Object[]> getTrafficPositions(SOURCE_TYPE source) throws ExecutionException {
@@ -58,6 +78,86 @@ public class JDBCConnector {
 
     public List<Object[]> getTrafficData(SOURCE_TYPE source, BY_TYPE by, long from, long to) throws ExecutionException {
         return trentoTrafficProcedure(source, by, from, to);
+    }
+
+    public List<Object[]> trentoParkingsProcedure() {
+        logger.info("Reading data for TRENTO DB sp_SelectParkingData CS");
+
+        Connection connection = null;
+        CallableStatement statement = null;
+        ResultSet rs = null;
+        List<Object[]> list = new ArrayList<>();
+        try {
+            // Get Connection instance from dataSource
+            connection = parkingsDataSource.getConnection();
+            statement = connection.prepareCall(
+                    "{CALL sp_SelectParkingData()}",
+                    ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_READ_ONLY);
+
+            boolean results = statement.execute();
+            int rowsAffected = 0;
+
+            // Protects against lack of SET NOCOUNT in stored procedure
+            while (results || rowsAffected != -1) {
+                if (results) {
+                    rs = statement.getResultSet();
+                    break;
+                } else {
+                    rowsAffected = statement.getUpdateCount();
+                }
+                results = statement.getMoreResults();
+            }
+
+            // read
+            while (rs.next()) {
+                // explicit map
+                Object[] obj = new Object[4];
+                obj[0] = rs.getObject(1);
+                obj[1] = rs.getObject(2);
+                obj[2] = rs.getObject(3);
+                obj[3] = rs.getObject(4);
+                list.add(obj);
+            }
+        } catch (Exception ex) {
+            logger.error("Error reading data for TRENTO DB sp_SelectParkingData: " + ex.getMessage());
+            ex.printStackTrace();
+        } finally {
+            if (rs != null) {
+                try {
+                    logger.debug("Close rs for TRENTO DB sp_SelectParkingData");
+                    rs.close();
+                } catch (SQLException ex) {
+                    logger.error(
+                            "Error closing rs for TRENTO DB sp_SelectParkingData: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+            if (statement != null) {
+                try {
+                    logger.debug("Close statement for TRENTO DB sp_SelectParkingData");
+                    statement.close();
+                } catch (SQLException ex) {
+                    logger.error(
+                            "Error closing statement for TRENTO DB sp_SelectParkingData: "
+                                    + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    logger.debug("Close connection for TRENTO DB sp_SelectParkingData");
+                    connection.close();
+                } catch (SQLException ex) {
+                    logger.error(
+                            "Error closing connection for TRENTO DB sp_SelectParkingData: "
+                                    + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+        }
+
+        return list;
     }
 
     public List<Object[]> trentoPositionProcedure(SOURCE_TYPE source) {
@@ -104,6 +204,7 @@ public class JDBCConnector {
         } finally {
             if (rs != null) {
                 try {
+                    logger.debug("Close rs for TRENTO DB sp_Select" + source + "PositionData");
                     rs.close();
                 } catch (SQLException ex) {
                     logger.error(
@@ -113,6 +214,7 @@ public class JDBCConnector {
             }
             if (statement != null) {
                 try {
+                    logger.debug("Close statement for TRENTO DB sp_Select" + source + "PositionData");
                     statement.close();
                 } catch (SQLException ex) {
                     logger.error(
@@ -123,6 +225,7 @@ public class JDBCConnector {
             }
             if (connection != null) {
                 try {
+                    logger.debug("Close connection for TRENTO DB sp_Select" + source + "PositionData");
                     connection.close();
                 } catch (SQLException ex) {
                     logger.error(

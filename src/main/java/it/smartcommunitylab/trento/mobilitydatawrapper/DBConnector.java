@@ -35,7 +35,7 @@ import it.smartcommunitylab.trento.mobilitydatawrapper.model.Position;
 import it.smartcommunitylab.trento.mobilitydatawrapper.model.SOURCE_TYPE;
 import it.smartcommunitylab.trento.mobilitydatawrapper.model.Traffic;
 
-@Component
+
 public class DBConnector {
 
 	@Autowired
@@ -52,7 +52,7 @@ public class DBConnector {
 
 	@PostConstruct
 	public void init() throws Exception {
-		GeoUtils.init();
+//		GeoUtils.init(); //DEPRECATED
 		
 		parkings = CacheBuilder.newBuilder().refreshAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<DATA_TYPE, List<Parking>>() {
 

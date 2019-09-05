@@ -39,7 +39,7 @@ public class DatabaseConfig {
 	@Autowired
 	private Environment env;
 	
-	@Bean
+	@Bean(name="parkingsDataSource")
 	public DriverManagerDataSource getParkingDataSource()  {
 		DriverManagerDataSource bean = new DriverManagerDataSource();
 		
