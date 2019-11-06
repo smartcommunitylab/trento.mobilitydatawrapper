@@ -38,6 +38,7 @@ public class DatawrapperService {
         logger.debug("getParkings");
 //      List<Object[]> result = jdb.trentoParkingsProcedure();
         List<Object[]> result = jdb.getParkingsData();
+        logger.debug("getParkings count: " + String.valueOf(result.size()));
 
         return result.stream()
                 .map(x -> new Parking(x))
@@ -65,6 +66,7 @@ public class DatawrapperService {
 
 //        List<Object[]> result = jdb.trentoTrafficProcedure(dbSource, by, from, to);
         List<Object[]> result = jdb.getTrafficData(dbSource, by, from, to);
+        logger.debug("getTraffic for " + source.name() + " by " + by.name() + " count: " + String.valueOf(result.size()));
 
         List<Traffic> traffic = new ArrayList<Traffic>();
 
@@ -79,7 +81,8 @@ public class DatawrapperService {
             // direct map first 4 objects to traffic
             traffic = result.stream().map(x -> new Traffic(x)).sorted().collect(Collectors.toList());
         }
-
+        
+        logger.debug("getTraffic for " + source.name() + " by " + by.name() + " result: " + String.valueOf(traffic.size()));
         return traffic;
     }
 

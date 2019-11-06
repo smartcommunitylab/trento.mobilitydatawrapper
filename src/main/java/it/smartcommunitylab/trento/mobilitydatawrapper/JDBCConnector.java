@@ -157,6 +157,8 @@ public class JDBCConnector {
             }
         }
 
+        logger.debug("Result data for TRENTO DB sp_SelectParkingData CS: "
+                + String.valueOf(list.size()));
         return list;
     }
 
@@ -236,6 +238,8 @@ public class JDBCConnector {
             }
         }
 
+        logger.debug("Result data for TRENTO DB sp_Select" + source + "PositionData via CS: "
+                + String.valueOf(list.size()));
         return list;
     }
 
@@ -327,6 +331,8 @@ public class JDBCConnector {
             }
         }
 
+        logger.debug("Result data for TRENTO DB sp_Select" + source + "Data via CS: "
+                + String.valueOf(list.size()));
         return list;
     }
 }
