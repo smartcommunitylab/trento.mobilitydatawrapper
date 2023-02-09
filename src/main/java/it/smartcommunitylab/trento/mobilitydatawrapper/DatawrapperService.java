@@ -70,17 +70,17 @@ public class DatawrapperService {
 
         List<Traffic> traffic = new ArrayList<Traffic>();
 
-        if (SOURCE_TYPE.NarxBikes.equals(source)) {
-            // parse bikes [field 6] as value for traffic
-            traffic = result.stream().map(x -> new Traffic(
-                    (Timestamp) x[0],
-                    (Clob) x[1],
-                    (Clob) x[2],
-                    (Integer) x[5])).sorted().collect(Collectors.toList());
-        } else {
+//        if (SOURCE_TYPE.NarxBikes.equals(source)) {
+//            // parse bikes [field 6] as value for traffic
+//            traffic = result.stream().map(x -> new Traffic(
+//                    (Timestamp) x[0],
+//                    (Clob) x[1],
+//                    (Clob) x[2],
+//                    (Integer) x[5])).sorted().collect(Collectors.toList());
+//        } else {
             // direct map first 4 objects to traffic
             traffic = result.stream().map(x -> new Traffic(x)).sorted().collect(Collectors.toList());
-        }
+//        }
         
         logger.debug("getTraffic for " + source.name() + " by " + by.name() + " result: " + String.valueOf(traffic.size()));
         return traffic;
@@ -103,12 +103,12 @@ public class DatawrapperService {
      * Helpers
      */
     private SOURCE_TYPE getDbSource(SOURCE_TYPE source) {
-        if (SOURCE_TYPE.NarxBikes.equals(source)) {
-            return SOURCE_TYPE.Narx;
-        } else if (SOURCE_TYPE.NarxPedestrians.equals(source)) {
-            return SOURCE_TYPE.Narx;
-        } else {
+//        if (SOURCE_TYPE.NarxBikes.equals(source)) {
+//            return SOURCE_TYPE.Narx;
+//        } else if (SOURCE_TYPE.NarxPedestrians.equals(source)) {
+//            return SOURCE_TYPE.Narx;
+//        } else {
             return source;
-        }
+//        }
     }
 }
