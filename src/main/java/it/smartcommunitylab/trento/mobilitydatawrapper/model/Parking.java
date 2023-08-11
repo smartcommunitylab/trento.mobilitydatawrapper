@@ -15,6 +15,8 @@ public class Parking {
 		id = name.split(" ")[0];
 		busy = (Integer) dbEntry[1];
 		free = (Integer) dbEntry[2];
+		if (free == null) free = 0;
+		if (busy == null) busy = 0;
 		if (dbEntry[3] != null) {
 			updated = ((Timestamp)dbEntry[3]).getTime();
 		} else {
