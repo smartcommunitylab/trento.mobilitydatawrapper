@@ -27,3 +27,4 @@ HELP.md
 /mvnw
 /mvnw.cmd
 /.mvn/
+/docker-configs/app.env.local

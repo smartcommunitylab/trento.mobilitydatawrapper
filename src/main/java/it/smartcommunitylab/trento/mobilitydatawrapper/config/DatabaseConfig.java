@@ -20,11 +20,10 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -36,17 +35,33 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAutoConfiguration
 public class DatabaseConfig {
 
-	@Autowired
-	private Environment env;
-	
+	@Value("${spring.datasource.driverClassName}")
+	private String dbDriverClassname;
+	@Value("${spring.jpa.hibernate.dialect}")
+	private String jpaDialect;
+
+	@Value("${db.parkings.url}")
+	private String dbParkingsUrl;
+	@Value("${db.parkings.username}")
+	private String dbParkingsUser;
+	@Value("${db.parkings.password}")
+	private String dbParkingsPassword;
+
+	@Value("${db.traffic.url}")
+	private String dbTrafficUrl;
+	@Value("${db.traffic.username}")
+	private String dbTrafficUser;
+	@Value("${db.traffic.password}")
+	private String dbTrafficPassword;
+
 	@Bean(name="parkingsDataSource")
 	public DriverManagerDataSource getParkingDataSource()  {
 		DriverManagerDataSource bean = new DriverManagerDataSource();
 		
-		bean.setDriverClassName(env.getProperty("spring.datasource.driverClassName"));
-		bean.setUrl(env.getProperty("db.parkings.url"));
-		bean.setUsername(env.getProperty("db.parkings.username"));
-		bean.setPassword(env.getProperty("db.parkings.password"));
+		bean.setDriverClassName(dbDriverClassname);
+		bean.setUrl(dbParkingsUrl);
+		bean.setUsername(dbParkingsUser);
+		bean.setPassword(dbParkingsPassword);
 
 		return bean;
 	}	
@@ -54,11 +69,11 @@ public class DatabaseConfig {
 	@Bean(name="parkingsEntityManagerFactory")
 	public EntityManagerFactory getParkingsEntityManagerFactory()  {
 		LocalContainerEntityManagerFactoryBean bean = new LocalContainerEntityManagerFactoryBean();
-		bean.setPersistenceUnitName(env.getProperty("jdbc.name"));
+		bean.setPersistenceUnitName("jdbc");
 		bean.setDataSource(getParkingDataSource());
 		
 		HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
-		adapter.setDatabasePlatform(env.getProperty("spring.jpa.hibernate.dialect"));
+		adapter.setDatabasePlatform(jpaDialect);
 		bean.setJpaVendorAdapter(adapter);
 		
 		bean.setJpaDialect(new DefaultJpaDialect());
@@ -80,10 +95,10 @@ public class DatabaseConfig {
 	public DriverManagerDataSource getTrafficDataSource()  {
 		DriverManagerDataSource bean = new DriverManagerDataSource();
 		
-		bean.setDriverClassName(env.getProperty("spring.datasource.driverClassName"));
-		bean.setUrl(env.getProperty("db.traffic.url"));
-		bean.setUsername(env.getProperty("db.traffic.username"));
-		bean.setPassword(env.getProperty("db.traffic.password"));
+		bean.setDriverClassName(dbDriverClassname);
+		bean.setUrl(dbTrafficUrl);
+		bean.setUsername(dbTrafficUser);
+		bean.setPassword(dbTrafficPassword);
 
 		return bean;
 	}	
@@ -91,11 +106,11 @@ public class DatabaseConfig {
 	@Bean(name="trafficEntityManagerFactory")
 	public EntityManagerFactory getTrafficEntityManagerFactory()  {
 		LocalContainerEntityManagerFactoryBean bean = new LocalContainerEntityManagerFactoryBean();
-		bean.setPersistenceUnitName(env.getProperty("jdbc.name"));
+		bean.setPersistenceUnitName("jdbc");
 		bean.setDataSource(getTrafficDataSource());
 		
 		HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
-		adapter.setDatabasePlatform(env.getProperty("spring.jpa.hibernate.dialect"));
+		adapter.setDatabasePlatform(jpaDialect);
 		bean.setJpaVendorAdapter(adapter);
 		
 		bean.setJpaDialect(new DefaultJpaDialect());
